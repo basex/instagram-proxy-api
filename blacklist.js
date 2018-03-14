@@ -11,7 +11,6 @@ exports.list = [
   'getspiff.no',
   'greteroede.no',
   'grolondon.co.uk',
-  'jumpseller.com',
   'kaributienda.cl',
   'kidmademodern.com',
   'leonidasoy.fi',
@@ -27,6 +26,5 @@ exports.list = [
   'selig.eu',
   'skinmotion.com',
   'sonymusic.de',
-  'weekendtrip.fr',
-  'xpodisainshop.cl'
+  'weekendtrip.fr'
 ];
