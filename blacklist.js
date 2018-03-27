@@ -11,7 +11,6 @@ exports.list = [
   'getspiff.no',
   'greteroede.no',
   'grolondon.co.uk',
-  'kaributienda.cl',
   'kidmademodern.com',
   'leonidasoy.fi',
   'likedike.com',
