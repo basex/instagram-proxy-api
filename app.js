@@ -367,15 +367,35 @@ InstaProxy.processGQL = function (request, response) {
  * @param {Object} response
  * @this
  */
-InstaProxy.processLegacy = function (request, response) {
-  let callback = function (body) {
-    let json = JSON.parse(body);
-    this.fetchFromInstagramGQL({ id: json.graphql.user.id }, request, response);
-  };
-  this.fetchFromInstagram(
-    '/' + request.params.username + '/',
-    { '__a': 1 },
-    this.callbackWrapper(response, callback.bind(this)));
+ InstaProxy.processLegacy = function (request, response) {
+   let callback = function (body) {
+     let json = JSON.parse(body);
+     //this.fetchFromInstagramGQL({ id: json.graphql.user.id }, request, response);
+
+     json = json.graphql.user.edge_owner_to_timeline_media;
+     let response = {};
+     let query;
+
+     // just copying.
+     query = Object.assign({}, request.query);
+
+     if (json.page_info.has_next_page) {
+       query.cursor = json.page_info.end_cursor;
+       response.next = this.constructURL(request.protocol, request.get('host'), request.path, query);
+     }
+
+     response.posts = [];
+     for (let i in json.edges) {
+       response.posts.push(json.edges[i].node);
+     }
+
+     return response;
+   };
+
+   this.fetchFromInstagram(
+     '/' + request.params.username + '/',
+     { '__a': 1 },
+     this.callbackWrapper(response, this.generateCallBackForWrapper(callback.bind(this), response)));
 };
 
 /**
