@@ -281,6 +281,7 @@ InstaProxy.callbackWrapper = function (response, callback) {
   return function (body) {
     try {
       callback(body);
+
     } catch (error) {
       this.respond(
         response,
@@ -369,7 +370,15 @@ InstaProxy.processGQL = function (request, response) {
  */
  InstaProxy.processLegacy = function (request, response) {
    let callback = function (body) {
-     let json = JSON.parse(body);
+     let r = new RegExp('<script type="text\/javascript">' +
+                        '([^{]+?({.*profile_pic_url.*})[^}]+?)' +
+                        '<\/script>');
+
+     let jsonStr = body.match(r)[2];
+     let data = JSON.parse(jsonStr);
+     let json = data['entry_data']['ProfilePage'][0];
+
+     //let json = JSON.parse(body);
      //this.fetchFromInstagramGQL({ id: json.graphql.user.id }, request, response);
 
      json = json.graphql.user.edge_owner_to_timeline_media;
@@ -394,7 +403,7 @@ InstaProxy.processGQL = function (request, response) {
 
    this.fetchFromInstagram(
      '/' + request.params.username + '/',
-     { '__a': 1 },
+     { },
      this.callbackWrapper(response, this.generateCallBackForWrapper(callback.bind(this), response)));
 };
 
