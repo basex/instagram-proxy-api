@@ -20,13 +20,15 @@ const Express = require('express');
 const Https = require('https');
 const ResponseTime = require('response-time');
 const Url = require('url');
+const NodeCache = require( "node-cache" );
 
+const instaCache = new NodeCache({stdTTL: 3600});
 /**
  * App Namespace
  * @const
  */
 const InstaProxy = {
-  ALLOW_UNDEFINED_REFERER: false,
+  ALLOW_UNDEFINED_REFERER: true,
   DEBUG_MODE: false || (process.env.NODE_ENV === 'dev'),
   ERROR_LOG_SEVERITY: 2,
   ENABLE_REFERER_CHECK: true,
@@ -398,13 +400,20 @@ InstaProxy.processGQL = function (request, response) {
        response.posts.push(json.edges[i].node);
      }
 
+     instaCache.set(request.params.username, response);
+
      return response;
    };
 
-   this.fetchFromInstagram(
-     '/' + request.params.username + '/',
-     { },
-     this.callbackWrapper(response, this.generateCallBackForWrapper(callback.bind(this), response)));
+   try {
+     var feed = instaCache.get( request.params.username, true )
+     response.status(this.STATUS_CODES.OK).jsonp(feed).end();
+   } catch(err) {
+     this.fetchFromInstagram(
+       '/' + request.params.username + '/',
+       { },
+       this.callbackWrapper(response, this.generateCallBackForWrapper(callback.bind(this), response)));
+    }
 };
 
 /**
