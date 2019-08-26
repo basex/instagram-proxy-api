@@ -390,6 +390,8 @@ InstaProxy.processGQL = function (request, response) {
      let data = JSON.parse(jsonStr);
      let json = data['entry_data']['ProfilePage'][0];
 
+
+
     //  console.log('DATA =======')
     //  console.log(data)
 
@@ -416,15 +418,32 @@ InstaProxy.processGQL = function (request, response) {
        response.posts.push(json.edges[i].node);
      }
 
+    console.log("CACHE")
+    
      instaCache.set(request.params.username, response);
 
      return response;
    };
 
    try {
+    // instaCache.get( request.params.username, function( err, value ){
+    //   if( !err ){
+    //     if(value == undefined){
+    //       // key not found
+    //     }else{
+    //       console.log("CACHE")
+    //       console.log( value );
+    //       //{ my: "Special", variable: 42 }
+    //       // ... do something ...
+    //     }
+    //   }
+    // });
+
      var feed = instaCache.get( request.params.username, true )
      response.status(this.STATUS_CODES.OK).jsonp(feed).end();
+     console.log("FETCH FROM FEED CACHE ==============")
    } catch(err) {
+     console.log("FETCH FROM INSTAGRAM ==============")
      this.fetchFromInstagram(
        '/' + request.params.username + '/',
        { },
