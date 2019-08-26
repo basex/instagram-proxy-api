@@ -161,32 +161,11 @@ InstaProxy.instagramFetcher = function (callback) {
  * @this
  */
 InstaProxy.fetchFromInstagram = function (path, query, callback) {
-  console.log("fetchFromInstagram ==========")
-  
-  const userAgents = ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.2 Safari/605.1.15', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0']
-
-  const options = {
-    hostname: 'www.instagram.com',
-    port: 443,
-    path: path,
-    method: 'GET',
-    headers: {
-      'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)]
-    }
-  };
-
-  console.log(options)
-
-  try {
-    Https.get(options,
-      this.instagramFetcher(callback.bind(this))
-    );
-  } catch (error) {
-    console.log('error on request')
-    console.log(error)
-  }
-  
-  
+  Https.get(
+    this.constructURL(
+      'https', 'www.instagram.com', path, query),
+    this.instagramFetcher(callback.bind(this))
+  );
 };
 
 /**
