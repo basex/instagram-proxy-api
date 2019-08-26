@@ -29,8 +29,8 @@ const instaCache = new NodeCache({stdTTL: 3600});
  */
 const InstaProxy = {
   ALLOW_UNDEFINED_REFERER: false,
-  DEBUG_MODE: false || (process.env.NODE_ENV === 'dev'),
-  ERROR_LOG_SEVERITY: 2,
+  DEBUG_MODE: true || (process.env.NODE_ENV === 'dev'),
+  ERROR_LOG_SEVERITY: 4,
   ENABLE_REFERER_CHECK: true,
   FETCH_COUNT_LIMIT: 200,
   GRAPH_PATH: '/graphql/query/',
@@ -107,6 +107,10 @@ InstaProxy.errorMessageGenerator = function (mesg, info) {
     desc: mesg.desc,
     info: info
   };
+
+  console.log("ERROR HANDLER ===============")
+  console.log(mesg)
+  console.log(info)
 
   if (this.DEBUG_MODE && mesg.sevr <= this.ERROR_LOG_SEVERITY) {
     this.log(JSON.stringify(response));
@@ -241,6 +245,11 @@ InstaProxy.isNotOnBlackList = function (urlString) {
  * @this
  */
 InstaProxy.isAdvancedRequestValid = function (request, response) {
+  console.log("REQUEST QUERY ==================")
+  console.log(request.query)
+  console.log(!('__a' in request.query))
+  console.log(!(request.query.__a === '1'))
+  console.log(!(request.path !== '/'))
   if (!('__a' in request.query &&
     request.query.__a === '1' &&
     request.path !== '/'
@@ -285,6 +294,7 @@ InstaProxy.callbackWrapper = function (response, callback) {
       callback(body);
 
     } catch (error) {
+      console.log("ERROR callbackWrapper")
       this.respond(
         response,
         this.STATUS_CODES.NOT_FOUND,
@@ -380,6 +390,12 @@ InstaProxy.processGQL = function (request, response) {
      let data = JSON.parse(jsonStr);
      let json = data['entry_data']['ProfilePage'][0];
 
+    //  console.log('DATA =======')
+    //  console.log(data)
+
+     console.log('JSON =======')
+     console.log(json)
+
      //let json = JSON.parse(body);
      //this.fetchFromInstagramGQL({ id: json.graphql.user.id }, request, response);
 
@@ -444,6 +460,8 @@ InstaProxy.respond = function (response, statusCode, jsonMessage) {
  * @this
  */
 InstaProxy.noContent = function (request, response) {
+  console.log("ERROR noContent")
+  console.log(request.path)
   this.respond(
     response,
     this.STATUS_CODES.NO_CONTENT,
