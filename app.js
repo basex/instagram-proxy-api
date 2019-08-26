@@ -417,12 +417,12 @@ InstaProxy.processGQL = function (request, response) {
      }
 
     console.log("CACHE")
-    myCache.get( request.params.username, function( err, value ){
+    instaCache.get( request.params.username, function( err, value ){
       if( !err ){
         if(value == undefined){
           // key not found
         }else{
-          console.log("CACHE =============================")
+          console.log("CACHE")
           console.log( value );
           //{ my: "Special", variable: 42 }
           // ... do something ...
