@@ -289,9 +289,9 @@ InstaProxy.callbackWrapper = function (response, callback) {
   return function (body) {
     try {
       callback(body);
-
+      
     } catch (error) {
-      instaCache.set(response.req.params.username, response, 86400); // one day cache for error responses
+      instaCache.set(response.req.params.username, null, 86400); // one day cache for error responses
       this.respond(
         response,
         this.STATUS_CODES.NOT_FOUND,
