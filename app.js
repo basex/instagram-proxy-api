@@ -128,6 +128,7 @@ InstaProxy.errorMessageGenerator = function (mesg, info) {
  * @return {String} new url.
  */
 InstaProxy.constructURL = function (protocol, host, path, query) {
+  console.log(Url.format({'protocol': protocol, 'host': host, 'pathname': path, 'query': query}))
   return Url.format({
     'protocol': protocol, 'host': host, 'pathname': path, 'query': query
   });
@@ -160,11 +161,32 @@ InstaProxy.instagramFetcher = function (callback) {
  * @this
  */
 InstaProxy.fetchFromInstagram = function (path, query, callback) {
-  Https.get(
-    this.constructURL(
-      'https', 'www.instagram.com', path, query),
-    this.instagramFetcher(callback.bind(this))
-  );
+  console.log("fetchFromInstagram ==========")
+  
+  const userAgents = ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.2 Safari/605.1.15', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0']
+
+  const options = {
+    hostname: 'www.instagram.com',
+    port: 443,
+    path: path,
+    method: 'GET',
+    headers: {
+      'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)]
+    }
+  };
+
+  console.log(options)
+
+  try {
+    Https.get(options,
+      this.instagramFetcher(callback.bind(this))
+    );
+  } catch (error) {
+    console.log('error on request')
+    console.log(error)
+  }
+  
+  
 };
 
 /**
@@ -176,6 +198,7 @@ InstaProxy.fetchFromInstagram = function (path, query, callback) {
  */
 InstaProxy.fetchFromInstagramGQL = function (param, request, response) {
   let queryId;
+  console.log("fetchFromInstagramGQL ==========")
 
   if (param.id != null) {
     queryId = this.GRAPH_USER_QUERY_ID;
@@ -244,12 +267,7 @@ InstaProxy.isNotOnBlackList = function (urlString) {
  * @return {Boolean}
  * @this
  */
-InstaProxy.isAdvancedRequestValid = function (request, response) {
-  console.log("REQUEST QUERY ==================")
-  console.log(request.query)
-  console.log(!('__a' in request.query))
-  console.log(!(request.query.__a === '1'))
-  console.log(!(request.path !== '/'))
+InstaProxy.isAdvancedRequestValid = function (request, response) {  
   if (!('__a' in request.query &&
     request.query.__a === '1' &&
     request.path !== '/'
@@ -390,14 +408,6 @@ InstaProxy.processGQL = function (request, response) {
      let data = JSON.parse(jsonStr);
      let json = data['entry_data']['ProfilePage'][0];
 
-
-
-    //  console.log('DATA =======')
-    //  console.log(data)
-
-     console.log('JSON =======')
-     console.log(json)
-
      //let json = JSON.parse(body);
      //this.fetchFromInstagramGQL({ id: json.graphql.user.id }, request, response);
 
@@ -416,29 +426,13 @@ InstaProxy.processGQL = function (request, response) {
      response.posts = [];
      for (let i in json.edges) {
        response.posts.push(json.edges[i].node);
-     }
-
-    console.log("CACHE")
-    
+     }    
      instaCache.set(request.params.username, response);
 
      return response;
    };
 
    try {
-    // instaCache.get( request.params.username, function( err, value ){
-    //   if( !err ){
-    //     if(value == undefined){
-    //       // key not found
-    //     }else{
-    //       console.log("CACHE")
-    //       console.log( value );
-    //       //{ my: "Special", variable: 42 }
-    //       // ... do something ...
-    //     }
-    //   }
-    // });
-
      var feed = instaCache.get( request.params.username, true )
      response.status(this.STATUS_CODES.OK).jsonp(feed).end();
      console.log("FETCH FROM FEED CACHE ==============")
