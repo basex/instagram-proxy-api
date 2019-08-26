@@ -22,7 +22,7 @@ const ResponseTime = require('response-time');
 const Url = require('url');
 const NodeCache = require( "node-cache" );
 
-const instaCache = new NodeCache({stdTTL: 3600});
+const instaCache = new NodeCache({stdTTL: 7200}); //cache for 2 hours
 /**
  * App Namespace
  * @const
@@ -285,13 +285,13 @@ InstaProxy.generateCallBackForWrapper = function (callback, response) {
  * @return {Function} callback
  * @this
  */
-InstaProxy.callbackWrapper = function (response, callback) {
+InstaProxy.callbackWrapper = function (response, callback) {  
   return function (body) {
     try {
       callback(body);
 
     } catch (error) {
-      console.log("ERROR callbackWrapper")
+      instaCache.set(response.req.params.username, response, 86400); // one day cache for error responses
       this.respond(
         response,
         this.STATUS_CODES.NOT_FOUND,
@@ -451,9 +451,7 @@ InstaProxy.respond = function (response, statusCode, jsonMessage) {
  * @param {Object} response
  * @this
  */
-InstaProxy.noContent = function (request, response) {
-  console.log("ERROR noContent")
-  console.log(request.path)
+InstaProxy.noContent = function (request, response) {  
   this.respond(
     response,
     this.STATUS_CODES.NO_CONTENT,
