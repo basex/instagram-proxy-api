@@ -291,15 +291,18 @@ InstaProxy.callbackWrapper = function (response, callback) {
       callback(body);
       
     } catch (error) {
-      console.log("callbackWrapper ERROR ========")
-      console.log(response.req.headers)
-      console.log(response.req.statusCode)
-      console.log(response.req.statusMessage)  
-      console.log('-------------------------------------------')
-      console.log(error)
 
+      if (body.indexOf("Sorry, this page isn&#39;t available.") > 0)  { // Page no longer exists
+        instaCache.set(response.req.params.username, null, 259200); // 3 days cache for error responses
+      } else {
+        console.log("callbackWrapper ERROR ========")
+        console.log(response.req.headers)
+        console.log(response.req.statusCode)
+        console.log(response.req.statusMessage)  
+        console.log('-------------------------------------------')
+        console.log(error)        
+      }
 
-      instaCache.set(response.req.params.username, null, 86400); // one day cache for error responses
       this.respond(
         response,
         this.STATUS_CODES.NOT_FOUND,
