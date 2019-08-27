@@ -285,12 +285,20 @@ InstaProxy.generateCallBackForWrapper = function (callback, response) {
  * @return {Function} callback
  * @this
  */
-InstaProxy.callbackWrapper = function (response, callback) {  
+InstaProxy.callbackWrapper = function (response, callback) {    
   return function (body) {
     try {
       callback(body);
       
     } catch (error) {
+      console.log("callbackWrapper ERROR ========")
+      console.log(response.req.headers)
+      console.log(response.req.statusCode)
+      console.log(response.req.statusMessage)  
+      console.log('-------------------------------------------')
+      console.log(error)
+
+
       instaCache.set(response.req.params.username, null, 86400); // one day cache for error responses
       this.respond(
         response,
