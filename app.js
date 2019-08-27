@@ -176,8 +176,7 @@ InstaProxy.fetchFromInstagram = function (path, query, callback) {
  * @this
  */
 InstaProxy.fetchFromInstagramGQL = function (param, request, response) {
-  let queryId;
-  console.log("fetchFromInstagramGQL ==========")
+  let queryId;  
 
   if (param.id != null) {
     queryId = this.GRAPH_USER_QUERY_ID;
@@ -422,11 +421,12 @@ InstaProxy.processGQL = function (request, response) {
 
      return response;
    };
+   
 
    try {
      var feed = instaCache.get( request.params.username, true )
      response.status(this.STATUS_CODES.OK).jsonp(feed).end();
-     console.log("FETCH FROM FEED CACHE ==============")
+     console.log("FETCH FROM FEED CACHE ============== Keys on cache : " + parseInt(instaCache.getStats().keys))
    } catch(err) {
      console.log("FETCH FROM INSTAGRAM ==============")
      this.fetchFromInstagram(
