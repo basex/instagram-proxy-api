@@ -298,7 +298,9 @@ InstaProxy.callbackWrapper = function (response, callback) {
         console.log("callbackWrapper ERROR ========")
         console.log(response.req.headers)
         console.log(response.req.statusCode)
-        console.log(response.req.statusMessage)  
+        console.log(response.req.statusMessage)
+        console.log('BODY -------------------------------------------')
+        console.log(body)
         console.log('-------------------------------------------')
         console.log(error)        
       }
