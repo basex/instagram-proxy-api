@@ -294,6 +294,7 @@ InstaProxy.callbackWrapper = function (response, callback) {
 
       if (body.indexOf("Sorry, this page isn&#39;t available.") > 0)  { // Page no longer exists
         instaCache.set(response.req.params.username, null, 259200); // 3 days cache for error responses
+        console.log("Instagram Profile doesn't exist: " + response.req.params.username)
       } else {
         console.log("callbackWrapper ERROR ========")
         console.log(response.req.headers)
