@@ -22,7 +22,7 @@ const ResponseTime = require('response-time');
 const Url = require('url');
 const NodeCache = require( "node-cache" );
 
-const instaCache = new NodeCache({stdTTL: 7200}); //cache for 2 hours
+const instaCache = new NodeCache({stdTTL: 43200}); //cache for 12 hours
 /**
  * App Namespace
  * @const
