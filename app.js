@@ -449,8 +449,7 @@ InstaProxy.processGQL = function (request, response) {
             throw error;
         }
         
-        if (feed == null) {
-          
+        if (feed == null) {          
           $this.fetchFromInstagram(
             '/' + request.params.username + '/',
             { },
