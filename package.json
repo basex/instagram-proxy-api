@@ -34,10 +34,12 @@
     "bloomxx": "0.0.5",
     "cors": "^2.8.4",
     "domain-parser": "0.0.5",
+    "dotenv": "^8.1.0",
     "express": "^4.16.2",
     "https": "^1.0.0",
+    "node-cache": "^4.2.0",
+    "redis": "^2.8.0",
     "response-time": "^2.3.2",
-    "url": "^0.11.0",
-    "node-cache": "^4.2.0"
+    "url": "^0.11.0"
   }
 }
