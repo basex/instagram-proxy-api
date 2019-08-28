@@ -11,6 +11,8 @@
 /* jshint node: true */
 'use strict';
 
+require('dotenv').config()
+
 // Imports.
 const Bloom = require('bloomxx');
 const Blacklist = require('./blacklist.js');
@@ -20,9 +22,21 @@ const Express = require('express');
 const Https = require('https');
 const ResponseTime = require('response-time');
 const Url = require('url');
-const NodeCache = require( "node-cache" );
+// const NodeCache = require( "node-cache" );
+const redis = require("redis");
 
-const instaCache = new NodeCache({stdTTL: 43200}); //cache for 12 hours
+// const instaCache = new NodeCache({stdTTL: 43200}); //cache for 12 hours
+const instaCache =  redis.createClient(process.env.REDIS_URL)
+
+instaCache.on('connect', function() {
+  console.log('Redis client connected with success!!!');
+});
+
+instaCache.on('error', function (err) {
+  console.log('Something went wrong on redis : ' + err);
+});
+
+
 /**
  * App Namespace
  * @const
@@ -292,7 +306,8 @@ InstaProxy.callbackWrapper = function (response, callback) {
     } catch (error) {
 
       if (body.indexOf("Sorry, this page isn&#39;t available.") > 0)  { // Page no longer exists
-        instaCache.set(response.req.params.username, null, 259200); // 3 days cache for error responses
+        instaCache.set(response.req.params.username, null, redis.print) 
+        instaCache.expire(response.req.params.username, 604800); // 7 days cache with user key
         console.log("Instagram Profile doesn't exist: " + response.req.params.username)
       } else {
         console.log("callbackWrapper ERROR ========")
@@ -391,6 +406,7 @@ InstaProxy.processGQL = function (request, response) {
  * @this
  */
  InstaProxy.processLegacy = function (request, response) {
+   let $this = this
    let callback = function (body) {
      let r = new RegExp('<script type="text\/javascript">' +
                         '([^{]+?({.*profile_pic_url.*})[^}]+?)' +
@@ -405,7 +421,7 @@ InstaProxy.processGQL = function (request, response) {
 
      json = json.graphql.user.edge_owner_to_timeline_media;
      let response = {};
-     let query;
+     let query;     
 
      // just copying.
      query = Object.assign({}, request.query);
@@ -418,24 +434,36 @@ InstaProxy.processGQL = function (request, response) {
      response.posts = [];
      for (let i in json.edges) {
        response.posts.push(json.edges[i].node);
-     }    
-     instaCache.set(request.params.username, response);
+     }           
+     instaCache.set(request.params.username, JSON.stringify(response), redis.print);
+     instaCache.expire(request.params.username, 43200); // cache for 12 hours with user key
 
      return response;
    };
    
-
+   
    try {
-     var feed = instaCache.get( request.params.username, true )
-     response.status(this.STATUS_CODES.OK).jsonp(feed).end();
-     console.log("FETCH FROM FEED CACHE ============== Keys on cache : " + parseInt(instaCache.getStats().keys))
+    instaCache.get(request.params.username, function (error, feed) {
+        if (error) {
+            console.log(error);
+            throw error;
+        }
+        
+        if (feed == null) {
+          
+          $this.fetchFromInstagram(
+            '/' + request.params.username + '/',
+            { },
+            $this.callbackWrapper(response, $this.generateCallBackForWrapper(callback.bind($this), response)));
+          console.log('FETCH FROM INSTAGRAM ON USER [' + request.params.username + '] ==============')
+        } else {          
+          response.status($this.STATUS_CODES.OK).jsonp(JSON.parse(feed)).end();
+          console.log('FETCH FROM FEED CACHE ON USER [' + request.params.username + '] ==============')
+        }
+    });
    } catch(err) {
-     console.log("FETCH FROM INSTAGRAM ==============")
-     this.fetchFromInstagram(
-       '/' + request.params.username + '/',
-       { },
-       this.callbackWrapper(response, this.generateCallBackForWrapper(callback.bind(this), response)));
-    }
+      console.log("an error occurred while fetching data : " + err)
+   }
 };
 
 /**
