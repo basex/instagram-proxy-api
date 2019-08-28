@@ -405,8 +405,7 @@ InstaProxy.processGQL = function (request, response) {
  * @param {Object} response
  * @this
  */
- InstaProxy.processLegacy = function (request, response) {
-   let $this = this
+ InstaProxy.processLegacy = function (request, response) {   
    let callback = function (body) {
      let r = new RegExp('<script type="text\/javascript">' +
                         '([^{]+?({.*profile_pic_url.*})[^}]+?)' +
@@ -442,7 +441,7 @@ InstaProxy.processGQL = function (request, response) {
    };
    
    
-   try {
+   try {    
     instaCache.get(request.params.username, function (error, feed) {
         if (error) {
             console.log(error);
@@ -450,16 +449,16 @@ InstaProxy.processGQL = function (request, response) {
         }
         
         if (feed == null) {          
-          $this.fetchFromInstagram(
+          this.fetchFromInstagram(
             '/' + request.params.username + '/',
             { },
-            $this.callbackWrapper(response, $this.generateCallBackForWrapper(callback.bind($this), response)));
+            this.callbackWrapper(response, this.generateCallBackForWrapper(callback.bind(this), response)));
           console.log('FETCH FROM INSTAGRAM ON USER [' + request.params.username + '] ==============')
         } else {          
-          response.status($this.STATUS_CODES.OK).jsonp(JSON.parse(feed)).end();
+          response.status(this.STATUS_CODES.OK).jsonp(JSON.parse(feed)).end();
           console.log('FETCH FROM FEED CACHE ON USER [' + request.params.username + '] ==============')
         }
-    });
+    }.bind(this))
    } catch(err) {
       console.log("an error occurred while fetching data : " + err)
    }
