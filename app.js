@@ -435,7 +435,11 @@ InstaProxy.processGQL = function (request, response) {
        response.posts.push(json.edges[i].node);
      }           
      instaCache.set(request.params.username, JSON.stringify(response), redis.print);
-     instaCache.expire(request.params.username, 43200); // cache for 12 hours with user key
+
+     let max = 25200 // 7 hours (in seconds)
+     let min = 21600 // 6 hours (in seconds)
+     let interval = (Math.floor(Math.random() * (max - min + 1)) + min)
+     instaCache.expire(request.params.username, interval)
 
      return response;
    };
@@ -583,7 +587,7 @@ InstaProxy.safeRefererMW = function (request, response, next) {
 InstaProxy.setUpRoutes = function () {
   this.log('Setting up routes.');
   this.app.get('/', this.sendToRepo.bind(this));
-  this.app.get('/*.(ico|png|css|html|js)', this.noContent.bind(this));
+  this.app.get('/*.(png|css|html|js)', this.noContent.bind(this));
   this.app.get('/server_check_hook', this.serverCheck.bind(this));
   let routeMap = this.getRouteMap();
   for (let route in routeMap) {
