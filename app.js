@@ -459,10 +459,12 @@ InstaProxy.processGQL = function (request, response) {
             this.callbackWrapper(response, this.generateCallBackForWrapper(callback.bind(this), response)));
           console.log('FETCH FROM INSTAGRAM ON USER [' + request.params.username + '] ==============')
         } else {
+          var result;
           try {
             result = JSON.parse(feed);
            } catch (e) {
             console.error('Unable to parse cache for ' + request.params.username);
+            console.log(feed);
             return;
            }
           response.status(this.STATUS_CODES.OK).jsonp(result).end();
